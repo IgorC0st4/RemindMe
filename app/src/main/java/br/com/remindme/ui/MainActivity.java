@@ -10,13 +10,10 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,27 +24,39 @@ import br.com.remindme.model.Reminder;
 import br.com.remindme.repository.ReminderRepository;
 
 public class MainActivity extends AppCompatActivity {
-    RecyclerView recyclerView;
-    TimePickerDialog timePickerDialog;
+
+    private static final String TAG = "MainActivity";
     final static int RQS_1 = 1;
-    ReminderRepository reminderRepository;
-    ReminderAdapter reminderAdapter;
-    ArrayList<Reminder> reminders;
+
+    private RecyclerView recyclerView;
+    private TimePickerDialog timePickerDialog;
+    private ReminderRepository reminderRepository;
+    private ReminderAdapter reminderAdapter;
+    private ArrayList<Reminder> reminders;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d(TAG, "onCreate: started");
+
+        initRepository();
+    }
+
+    private void initRepository() {
         reminderRepository = new ReminderRepository(MainActivity.this);
         reminders = (ArrayList<Reminder>) reminderRepository.getAll();
+        initRecyclerView();
+    }
+
+    private void initRecyclerView(){
+        Log.d(TAG, "initRecyclerView: init recyclerview");
         recyclerView = findViewById(R.id.recycler_view);
-        recyclerView.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(layoutManager);
-        reminderAdapter = new ReminderAdapter(reminders);
+        reminderAdapter = new ReminderAdapter(reminders, MainActivity.this);
         recyclerView.setAdapter(reminderAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
     }
 
     public void openTimePickerDialog(View view) {
@@ -77,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
             }
             Reminder reminder = new Reminder();
 
-
             String title = "Reminder " + (reminderRepository.count()+1);
 
             reminder.setHour(hourOfDay);
@@ -86,20 +94,19 @@ public class MainActivity extends AppCompatActivity {
 
             if(reminderRepository.insert(reminder)){
                 Toast.makeText(MainActivity.this, "Reminder saved", Toast.LENGTH_SHORT).show();
-                reminderAdapter.notifyItemInserted((reminderRepository.count()-1));
             }
 
-            //setAlarm(calSet);
+            initRepository();
+            setAlarm(calSet);
         }
     };
 
-    /*
-    private void setAlarm(Calendar targetCal){
 
+    private void setAlarm(Calendar targetCal){
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(getBaseContext(), AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), RQS_1, intent, 0);
-        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
     }
-    */
+
 }

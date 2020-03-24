@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">RemindMe</string>
+    <string name="channel_name">REMINDME</string>
+    <string name="channel_description">REMINDER</string>
 </resources>

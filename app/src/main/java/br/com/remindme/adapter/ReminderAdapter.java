@@ -1,11 +1,15 @@
 package br.com.remindme.adapter;
 
+import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -13,41 +17,60 @@ import java.util.List;
 import br.com.remindme.R;
 import br.com.remindme.model.Reminder;
 
-public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder> {
+public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.ViewHolder> {
 
-    private List<Reminder> mList;
+    private static final String TAG = "ReminderAdapter";
+    private List<Reminder> reminders;
+    private Context context;
 
-    public ReminderAdapter(List<Reminder> list){
-        this.mList = list;
+    public ReminderAdapter(List<Reminder> reminders, Context context) {
+        this.reminders = reminders;
+        this.context = context;
     }
 
     @Override
-    public ReminderViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View itemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_reminder, viewGroup, false);
-        return new ReminderViewHolder(itemView);
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_reminder, viewGroup, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ReminderViewHolder viewHolder, int i) {
-        Reminder reminder = mList.get(i);
+    public void onBindViewHolder(ViewHolder viewHolder, int i) {
+        Log.d(TAG, "onBindViewHolder: called.");
+        final Reminder reminder = reminders.get(i);
         viewHolder.txtTitle.setText(reminder.getTitle());
-        viewHolder.txtTime.setText(""+reminder.getHour()+":"+reminder.getMinute());
+        viewHolder.txtTime.setText("" + reminder.getHour() + ":" + reminder.getMinute());
+
+        viewHolder.constraintLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: clicked on: " + reminder.getTitle());
+
+
+
+
+                Toast.makeText(context, reminder.getTitle(), Toast.LENGTH_LONG).show();
+
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return mList.size();
+        return reminders.size();
     }
 
-    protected static class ReminderViewHolder  extends RecyclerView.ViewHolder{
 
-        protected TextView txtTitle;
-        protected TextView txtTime;
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        TextView txtTitle;
+        TextView txtTime;
+        ConstraintLayout constraintLayout;
 
-        public ReminderViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtTitle = itemView.findViewById(R.id.txt_title);
             txtTime = itemView.findViewById(R.id.txt_time);
+            constraintLayout = itemView.findViewById(R.id.parent_layout);
         }
     }
 }
